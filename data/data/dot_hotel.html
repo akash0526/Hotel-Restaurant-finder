@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="icon" href="/logo.png" type="image/x-icon">
+     <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/html_helper/custom/css/login.css" />
+    <link href="/custom/css/login.css" rel="stylesheet" />
+    <link href="/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="/font-awesome/css/fontawesome.min.css" rel="stylesheet" />
+
+</head>
+<body>
+
+    <div id="app">
+        <v-page-form-com :page="page"></v-page-form-com> 
+
+
+
+    </div>
+    <script src="/js/jquery-3.6.0.min.js?v=zp0HUArZHsK1JMJwdk7EyaM-eDINjTdOxADt5Ij2JRs"></script>
+    <script src="/js/jquery-ui.min.js?v=IcrMqOnrmPHzJwK0F2aF8vlBr1GrW8fPiMy1Q1obsIA"></script>
+    <script src="/js/vue-v2.6.11.js?v=pBBGAoWWiuVvN0jlf9CcbaY8F5NKn1nMf5plQvXPLTs"></script>
+    <script src="/js/bootstrap.min.js?v=SUzPu-ewjZCj6CtwVs9sNh6Q_LMFi1w1RZ9TxpKmVkE"></script>
+    <script src="/js/app-url.js?v=JVG4NQosX6RiDEF6a8DUj0RQcwU5G23l02ojdZIrXdI"></script>
+    <script src="/js/model/app-model.js?v=OjQbzOdOzeS-tH4EPmSgeZAOvCZCR_x067RrZfD0Iq0"></script>
+    <script src="/js/app-public.js?v=pAduSBVxpDB8GQ7-XKfjtEMHsV1AaVux7xjQ6TpjGnk"></script>
+    <script src="/js/Language/en.js?v=5xQnUmCKzjBmnCXhgQWvrQeMySAcujW2zJn6AdIB8OU"></script>
+    <script src="/js/Language/np.js?v=ucss4fc5xUYx98I1lHk-jP1G2tGcwdipuMoTWQndSws"></script>
+    <script src="/js/Language/vue-i18n.js?v=M59w0-G9zkcaxWdBlWieHRDaXvvWwkbBlqiFseEjouU"></script>
+    <script src="/js/Language/translate.js?v=0IyCC8bRB4-4WKUJqVwg7dZyW7ZlCqQckNG6GF923s0"></script>
+    <script src="/js/store/vuex.js?v=3p_xMAEyio0YcdcHTJBUv5yEOVOF9l07h9jwVX_NV2Y"></script>
+    <script src="/js/store/index.js?v=vhDJBh09kIJVzEBR5QplkTlNspNYmQ1O9ibEwHsLc7I"></script>
+    <script src="/js/vue-toastification/index.js"></script>
+    <link href="/js/vue-toastification//index.css" rel="stylesheet">
+
+    
+<script >
+
+    $(document).ready(function () {
+        Vue.component('v-page-form-com', function (resolve, reject) {
+                $.get(htmlAuthLoginUrl.form).then(function (res) {
+                    resolve({
+                        template: res, props: ['page']
+                    })
+                });
+            });
+            vPage = new Vue({
+                el: '#app',
+                i18n,
+                store,
+        created() {
+                this.$store.commit('changeLang', localStorage.getItem("lang") || 'np')
+            },
+                data: {
+                    page: new loginModel()
+                }
+            });
+        
+    });
+    function login() {
+            vPage.page.loading = true;
+        if (isEmptyOrSpaces(vPage.page.mData.userName) || isEmptyOrSpaces(vPage.page.mData.password)) {
+            vPage.page.msg = new messageModel('Warning', 'Fill all the required fields.');
+            vPage.page.viewMsg = true;
+                vPage.page.loading = false;
+            return;
+        }
+        var request = postRequest(apiAuthLoginUrl.login, vPage.page.mData)
+        request.done(function (response) {
+            vPage.page.viewMsg = true;
+                vPage.page.loading = false;
+            vPage.page.msg = response.msg;
+            if (response.msg.status) {
+             
+                var tokenCooki = "pgwToken=Bearer " + response.data.jwtToken + "; expires=" + response.data.tokenExpiry + "; path=/;";
+                document.cookie = tokenCooki;
+                //document.cookie="lang=en"
+                if(response.data.userTypeId==2)
+                {
+                window.location = "/dot/#company/dashboard";
+                }
+                else if(response.data.userTypeId==1)
+                {
+                window.location = "/dot/#admin/dashboard";
+                }
+                else{
+                window.location = "/dot/#dashboard";
+                }
+                //document.cookie="lang=en"
+            }
+        });
+    }
+     function forgotpassword() {     
+              window.location = "/home/forgotpassword/";
+    }
+      function changepassword() {
+      window.location = "/home/changepassword/";
+        
+    }
+      function newregister() {
+      window.location = "/home/registration/";
+        
+    }
+ 
+
+</script>
+
+    <script>
+        
+        var checkAuthRequest = getRequest(apiAuthLoginUrl.userDetail)
+        checkAuthRequest.done(function (response) {
+            if (response.msg.status) {
+                //window.location = "/office/dashboard/";
+            }
+        });
+         function checkSubmit(e) {
+           if(e && e.keyCode == 13) {
+               login()
+           }
+        }
+
+    </script>
+</body>
+</html>

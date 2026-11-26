@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <!-- App data isn't backed up until we add remote sync. -->
+</data-extraction-rules>

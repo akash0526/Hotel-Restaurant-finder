@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Application theme. -->
+    <style name="Theme.LocalPlaceFinder" parent="androidx.appcompat.app.Theme.AppCompat.DayNight">
+        <item name="android.textAppearanceListItemColorPrimary">@style/TextAppearance.AppCompat.Body1</item>
+        <item name="android.textAppearanceListItemColorPrimaryInverse">@style/TextAppearance.AppCompat.Body1.Inverse</item>
+        <item name="android.textAppearanceListItemSecondary">@style/TextAppearance.AppCompat.Small</item>
+        <item name="android.textAppearanceListItemTertiary">@style/TextAppearance.AppCompat.Small</item>
+    </style>
+</resources>
