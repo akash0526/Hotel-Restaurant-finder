@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.placefinder.directory.R
+import com.placefinder.directory.data.GeoUtils
 import com.placefinder.directory.data.repository.PlaceRepository
 import com.placefinder.directory.viewmodels.PlaceDetailViewModel
 
@@ -69,12 +70,30 @@ fun PlaceDetailScreen(
                     Column(Modifier.padding(16.dp)) {
                         Text(place.name, style = MaterialTheme.typography.headlineSmall)
                         Spacer(Modifier.height(8.dp))
+                        Text(
+                            listOfNotNull(
+                                GeoUtils.listingTypeLabel(place.listingType),
+                                place.city.ifBlank { null },
+                                place.region,
+                            ).joinToString(" · "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(8.dp))
                         Text(place.address, style = MaterialTheme.typography.bodyMedium)
                         Spacer(Modifier.height(8.dp))
                         Text(
                             text = place.description.ifBlank { stringResource(R.string.no_description) },
                             style = MaterialTheme.typography.bodyMedium,
                         )
+                        place.openingHours?.takeIf { it.isNotBlank() }?.let { hours ->
+                            Spacer(Modifier.height(8.dp))
+                            Text(hours, style = MaterialTheme.typography.bodySmall)
+                        }
+                        place.website?.takeIf { it.isNotBlank() }?.let { url ->
+                            Spacer(Modifier.height(8.dp))
+                            Text(url, style = MaterialTheme.typography.bodySmall)
+                        }
                         if (!place.phone.isNullOrBlank()) {
                             Spacer(Modifier.height(8.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {

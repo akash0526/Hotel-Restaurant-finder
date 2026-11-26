@@ -3,8 +3,15 @@
     <string name="app_name">LocalPlaces</string>
     <string name="explore">Explore</string>
     <string name="my_places">My Places</string>
-    <string name="search_places">Search hotels, restaurants...</string>
-    <string name="no_places_found">No places found yet.</string>
+    <string name="search_places">Search hotels, city or area…</string>
+    <string name="search_map_location">Search a city or area (Pokhara, Butwal…)</string>
+    <string name="no_places_found">No hotels found nearby. Try a wider radius or another city.</string>
+    <string name="enable_location_or_search">Allow location to see hotels near you, or search a city.</string>
+    <string name="hotels_nearby_count">%1$d hotels within %2$d km of you</string>
+    <string name="hotels_near_search">%1$d hotels near %2$s · within %3$d km</string>
+    <string name="location_not_found">Could not find that place. Try a city name in Nepal.</string>
+    <string name="loading_hotels">Loading Nepal hotels…</string>
+    <string name="osm_attribution">Accommodation data © OpenStreetMap contributors (ODbL)</string>
     <string name="place_details">Place details</string>
     <string name="call">Call</string>
     <string name="call_place">Call place</string>

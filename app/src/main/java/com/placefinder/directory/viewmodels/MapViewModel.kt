@@ -3,24 +3,19 @@ package com.placefinder.directory.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import com.placefinder.directory.data.GeoUtils
 import com.placefinder.directory.data.models.Place
 import com.placefinder.directory.data.repository.PlaceRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import kotlin.math.asin
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 /**
  * Powers the Map screen.
  *
- * `placesFlow` shows the radius filter: when we know the user's location, only places
- * within [radiusMeters] are listed. Before the location is known, everything is shown.
+ * Pins are hotels within [radiusMeters] of [origin] (GPS or a searched city).
+ * Until an origin is set, no pins are drawn — 7k+ markers would freeze the map.
  */
 class MapViewModel(private val repository: PlaceRepository) : ViewModel() {
 
@@ -30,46 +25,113 @@ class MapViewModel(private val repository: PlaceRepository) : ViewModel() {
     private val _radiusMeters = MutableStateFlow(20_000)
     val radiusMeters: StateFlow<Int> = _radiusMeters
 
+    private val _origin = MutableStateFlow<LatLng?>(null)
+    val origin: StateFlow<LatLng?> = _origin
+
     private val _userLocation = MutableStateFlow<LatLng?>(null)
     val userLocation: StateFlow<LatLng?> = _userLocation
 
-    private val placesFlow: Flow<List<Place>> = combine(
-        repository.allPlaces,
-        _radiusMeters,
-        _userLocation,
-    ) { allPlaces, radiusMeters, userLocation ->
-        if (userLocation == null) {
-            allPlaces
-        } else {
-            allPlaces.filter { place ->
-                val lat = place.latitude
-                val lng = place.longitude
-                lat != null && lng != null &&
-                    distanceBetween(userLocation.latitude, userLocation.longitude, lat, lng) <= radiusMeters
-            }
-        }
-    }
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    private val _searchHint = MutableStateFlow<String?>(null)
+    val searchHint: StateFlow<String?> = _searchHint
 
     init {
-        viewModelScope.launch { placesFlow.collect { _places.value = it } }
+        viewModelScope.launch {
+            combine(
+                repository.allPlaces,
+                _radiusMeters,
+                _origin,
+            ) { allPlaces, radiusMeters, origin ->
+                if (origin == null) {
+                    emptyList()
+                } else {
+                    allPlaces
+                        .asSequence()
+                        .mapNotNull { place ->
+                            val lat = place.latitude ?: return@mapNotNull null
+                            val lng = place.longitude ?: return@mapNotNull null
+                            val meters = GeoUtils.distanceMeters(
+                                origin.latitude, origin.longitude, lat, lng,
+                            )
+                            if (meters <= radiusMeters) place to meters else null
+                        }
+                        .sortedBy { it.second }
+                        .take(MAX_MARKERS)
+                        .map { it.first }
+                        .toList()
+                }
+            }.collect { _places.value = it }
+        }
     }
 
     fun setRadiusMeters(value: Int) {
         _radiusMeters.value = value
     }
 
-    fun onUserLocationChanged(latitude: Double, longitude: Double) {
-        _userLocation.value = LatLng(latitude, longitude)
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
     }
 
-    /** Approximate great-circle distance between two points, in meters. */
-    private fun distanceBetween(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
-        val R = 6_371_000.0
-        val p1 = lat1 * Math.PI / 180.0
-        val p2 = lat2 * Math.PI / 180.0
-        val dp = (lat2 - lat1) * Math.PI / 180.0
-        val dl = (lng2 - lng1) * Math.PI / 180.0
-        val a = sin(dp / 2).pow(2) + cos(p1) * cos(p2) * sin(dl / 2).pow(2)
-        return 2 * R * asin(sqrt(a))
+    fun onUserLocationChanged(latitude: Double, longitude: Double) {
+        val latLng = LatLng(latitude, longitude)
+        _userLocation.value = latLng
+        _origin.value = latLng
+        _searchHint.value = null
+    }
+
+    /**
+     * Center the radius search on a city, region, or hotel name from the catalog.
+     * Returns the resolved coordinate, or null if nothing matched.
+     */
+    fun searchPlace(query: String): LatLng? {
+        val q = query.trim()
+        if (q.isEmpty()) return _origin.value
+        val catalog = repositorySnapshot()
+        val resolved = resolveSearch(q, catalog) ?: return null
+        _origin.value = resolved
+        _searchHint.value = q
+        return resolved
+    }
+
+    fun applyGeocodedOrigin(query: String, latitude: Double, longitude: Double) {
+        _origin.value = LatLng(latitude, longitude)
+        _searchHint.value = query.trim()
+    }
+
+    private fun repositorySnapshot(): List<Place> = _lastCatalog
+
+    private var _lastCatalog: List<Place> = emptyList()
+
+    init {
+        viewModelScope.launch {
+            repository.allPlaces.collect { _lastCatalog = it }
+        }
+    }
+
+    companion object {
+        const val MAX_MARKERS = 150
+
+        fun resolveSearch(query: String, places: List<Place>): LatLng? {
+            val q = query.trim()
+            if (q.isEmpty()) return null
+            val exactCity = places.filter {
+                it.city.equals(q, ignoreCase = true) || it.region.equals(q, ignoreCase = true)
+            }
+            val pool = exactCity.ifEmpty {
+                places.filter { place ->
+                    place.city.contains(q, ignoreCase = true) ||
+                        (place.region?.contains(q, ignoreCase = true) == true) ||
+                        place.name.contains(q, ignoreCase = true) ||
+                        place.address.contains(q, ignoreCase = true)
+                }
+            }.filter { it.latitude != null && it.longitude != null }
+            if (pool.isEmpty()) return null
+            return LatLng(
+                pool.map { it.latitude!! }.average(),
+                pool.map { it.longitude!! }.average(),
+            )
+        }
     }
 }

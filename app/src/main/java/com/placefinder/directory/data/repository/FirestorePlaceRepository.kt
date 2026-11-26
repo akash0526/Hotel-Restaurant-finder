@@ -93,6 +93,8 @@ class FirestorePlaceRepository(
         isOwnedByUser = getBoolean("isOwnedByUser") ?: false,
         rating = getDouble("rating") ?: 0.0,
         reviewCount = getLong("reviewCount")?.toInt() ?: 0,
+        listingType = getString("listingType"),
+        photoUrl = getString("photoUrl"),
         createdAt = getLong("createdAt") ?: 0,
         updatedAt = getLong("updatedAt") ?: 0,
     )
@@ -116,6 +118,8 @@ class FirestorePlaceRepository(
         "isOwnedByUser" to isOwnedByUser,
         "rating" to rating,
         "reviewCount" to reviewCount,
+        "listingType" to listingType,
+        "photoUrl" to photoUrl,
         "createdAt" to createdAt,
         "updatedAt" to updatedAt,
     )

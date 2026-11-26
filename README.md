@@ -21,6 +21,9 @@ tourists browse them.
 - Place detail: address, description, phone, with a "Call place" button
 - Editor: add/edit a hotel/restaurant profile (name, category, address, phone,
   description, availability), used from My Places
+- **Nepal hotels catalog** is seeded on first launch from `app/src/main/assets/hotels_seed.json`
+  (7,630 named lodgings with GPS). Explore lists hotels near you; Map drops pins within a
+  radius of your GPS or a searched city (Pokhara, Butwal, Kathmandu, …).
 - All data is device-local (Room database `places.db`)
 
 ## Planned stages
@@ -34,9 +37,11 @@ tourists browse them.
 3. ✅ **Stage 3 — done:** "My Places" editor + delete: create/update a hotel/restaurant
    profile (name, category, address, phone, availability), delete places. New:
    `PlaceEditorScreen`, `PlaceEditorViewModel`.
-4. ✅ **Stage 4 — done (Firestore):** `FirestorePlaceRepository` is the app's source of
-   truth — hotels update listings and availability live; the app keeps a live view of the
-   `places` collection. New deps: `com.google.firebase:firebase-firestore:26.6.0`.
+4. ✅ **Stage 4 — Firestore client kept** (`FirestorePlaceRepository`) for a later remote
+   sync. The tourist catalog now ships in-app so Explore/Map work without Firebase.
+5. ✅ **Stage 5 — Nepal hotel seed + nearby map:** Room is seeded from OpenStreetMap-derived
+   `hotels_seed.json`. Location permission centers the map; radius slider filters pins;
+   search jumps to a city. Explore sorts by distance.
 
 ### Stage 4 setup (required to run the app with Firestore)
 
