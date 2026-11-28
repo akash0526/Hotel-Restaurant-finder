@@ -32,6 +32,8 @@ data class Place(
     val isOwnedByUser: Boolean = false,
     val rating: Double = 0.0,
     val reviewCount: Int = 0,
+    val listingType: String? = null,
+    val photoUrl: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
 )

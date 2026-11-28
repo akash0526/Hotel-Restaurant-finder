@@ -10,7 +10,7 @@ import com.placefinder.directory.data.models.Place
  * SQLite database backed by Room. Everything is device-local in Stage 1;
  * Stage 4 can add a remote sync layer on top of the same models.
  */
-@Database(entities = [Place::class], version = 1, exportSchema = false)
+@Database(entities = [Place::class], version = 2, exportSchema = false)
 abstract class PlaceDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao
