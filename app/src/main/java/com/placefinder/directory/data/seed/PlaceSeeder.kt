@@ -10,6 +10,8 @@ import org.json.JSONObject
 
 /**
  * Loads the Nepal hotels catalog from [assets/hotels_seed.json] into Room once.
+ * That asset is the only catalog the APK ships; the repo `data/` pipeline is not used
+ * at runtime and can be deleted before a Play Store build.
  * Seeded rows are not owned by the user, so they show on Explore/Map but not My Places.
  */
 object PlaceSeeder {

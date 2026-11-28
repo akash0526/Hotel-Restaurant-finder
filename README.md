@@ -24,7 +24,7 @@ tourists browse them.
 - **Nepal hotels catalog** is seeded on first launch from `app/src/main/assets/hotels_seed.json`
   (7,630 named lodgings with GPS). Explore lists hotels near you; Map drops pins within a
   radius of your GPS or a searched city (Pokhara, Butwal, Kathmandu, …).
-- All data is device-local (Room database `places.db`)
+- All listing data is device-local (Room database `places.db`). See [docs/HOTEL_CATALOG.md](docs/HOTEL_CATALOG.md).
 
 ## Planned stages
 
@@ -73,8 +73,20 @@ Build files reference recent, stable versions (AGP 8.7.3, Kotlin 2.0.20, Room 2.
 Compose ~1.7.x). If Gradle suggests newer/incompatible versions, bump them in the
 build files — the structure is the part that matters.
 
-## Taking it to the Play Store (separate milestone)
+## Play Store: the `data/` folder is not part of the app
 
-When the app works locally: generate a signed App Bundle (`./gradlew :app:bundleRelease`,
-add a release signingConfig), set up the $25 Google Play Developer account, and go through
-the Play Console publishing flow.
+Gradle only builds `:app`. The repo `data/` directory is the **offline pipeline** that
+produced the catalog (raw OSM JSON, stage files, xlsx/csv). It is **not** packaged in
+the APK.
+
+- **Keep:** `app/src/main/assets/hotels_seed.json` (this is what tourists see)
+- **Keep:** `docs/HOTEL_CATALOG.md` (sources + ODbL attribution)
+- **Safe to delete** before you upload to Play: the entire `data/` folder
+
+```
+rm -rf data
+./gradlew :app:bundleRelease
+```
+
+When the app works locally: generate a signed App Bundle, add a release signingConfig,
+set up the $25 Google Play Developer account, and go through the Play Console publishing flow.
