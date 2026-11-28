@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LocalPlaces</string>
+    <string name="app_name">Places</string>
+    <string name="brand_name">Places</string>
     <string name="explore">Explore</string>
-    <string name="my_places">My Places</string>
-    <string name="search_places">Search hotels, city or area…</string>
-    <string name="search_map_location">Search a city or area (Pokhara, Butwal…)</string>
-    <string name="no_places_found">No hotels found nearby. Try a wider radius or another city.</string>
-    <string name="enable_location_or_search">Allow location to see hotels near you, or search a city.</string>
+    <string name="explore_headline">Find a stay</string>
+    <string name="explore_subhead">Hotels near you across Nepal</string>
+    <string name="my_places">Host</string>
+    <string name="my_places_headline">Your listings</string>
+    <string name="my_places_subhead">Places you manage on this device</string>
+    <string name="hours">Hours</string>
+    <string name="website">Website</string>
+    <string name="search_places">Hotel, city or area</string>
+    <string name="search_map_location">Search a city</string>
+    <string name="no_places_found">Nothing nearby. Try another city.</string>
+    <string name="enable_location_or_search">Turn on location, or search a city to see hotels around you.</string>
     <string name="hotels_nearby_count">%1$d hotels within %2$d km of you</string>
     <string name="hotels_near_search">%1$d hotels near %2$s · within %3$d km</string>
     <string name="location_not_found">Could not find that place. Try a city name in Nepal.</string>
-    <string name="loading_hotels">Loading Nepal hotels…</string>
+    <string name="loading_hotels">Finding stays nearby</string>
     <string name="osm_attribution">Accommodation data © OpenStreetMap contributors (ODbL)</string>
     <string name="place_details">Place details</string>
     <string name="call">Call</string>
@@ -18,7 +25,7 @@
     <string name="no_phone">Phone not listed</string>
     <string name="no_description">No description added yet.</string>
     <string name="loading">Loading...</string>
-    <string name="no_my_places">You don't have any places listed yet.</string>
+    <string name="no_my_places">No listings yet. Add a hotel or restaurant so travellers can find you.</string>
     <string name="status_open">Open</string>
     <string name="status_closed">Closed</string>
     <string name="status_unavailable">Unavailable</string>

@@ -1,6 +1,6 @@
 package com.placefinder.directory.ui.screens
 
-import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,27 +8,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.placefinder.directory.R
@@ -38,9 +42,7 @@ import com.placefinder.directory.data.models.PlaceStatus
 import com.placefinder.directory.data.repository.PlaceRepository
 import com.placefinder.directory.viewmodels.PlaceEditorViewModel
 
-/**
- * "Add / edit a place" form. Requires a name and an address to save.
- */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaceEditorScreen(
     repository: PlaceRepository,
@@ -58,30 +60,27 @@ fun PlaceEditorScreen(
     val title = if (placeId == null) R.string.add_place else R.string.edit_place
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(title)) },
+                title = { Text(stringResource(title), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
-                actions = {
-                    IconButton(onClick = { viewModel.save() }, enabled = isValid) {
-                        Icon(
-                            imageVector = Icons.Default.Save,
-                            contentDescription = stringResource(R.string.save),
-                        )
-                    }
-                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
             )
-        }
+        },
     ) { padding ->
         Column(
             Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .verticalScroll(ScrollState(0)),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 8.dp),
         ) {
             Field(stringResource(R.string.place_name), form.name, viewModel::setName)
             ValidationText(if (viewModel.isNameValid) null else stringResource(R.string.validation_name))
@@ -102,9 +101,9 @@ fun PlaceEditorScreen(
                 label = { Text(stringResource(R.string.place_description)) },
                 minLines = 3,
                 singleLine = false,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = MaterialTheme.shapes.medium,
+                colors = fieldColors(),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
             )
 
             StatusChips(form = form, onStatusChange = viewModel::setStatus)
@@ -114,12 +113,10 @@ fun PlaceEditorScreen(
                 onValueChange = { text -> viewModel.setRoomsFree(text.toIntOrNull()) },
                 label = { Text(stringResource(R.string.place_rooms_free)) },
                 singleLine = true,
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = MaterialTheme.shapes.medium,
+                colors = fieldColors(),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
             )
 
             Field(
@@ -128,34 +125,46 @@ fun PlaceEditorScreen(
                 viewModel::setAvailabilityNote,
             )
 
+            Spacer(Modifier.height(12.dp))
             Button(
                 onClick = { viewModel.save() },
                 enabled = isValid,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .height(52.dp),
+                shape = MaterialTheme.shapes.medium,
             ) {
                 Text(stringResource(R.string.save))
             }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
 
-/** Single line text field row. */
+@Composable
+private fun fieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = MaterialTheme.colorScheme.primary,
+    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+    focusedContainerColor = MaterialTheme.colorScheme.surface,
+    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+)
+
 @Composable
 private fun Field(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
 ) {
-    TextField(
+    OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         singleLine = true,
+        shape = MaterialTheme.shapes.medium,
+        colors = fieldColors(),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(vertical = 6.dp),
     )
 }
 
@@ -166,7 +175,7 @@ private fun ValidationText(message: String?) {
             text = message,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.padding(start = 40.dp, end = 16.dp),
+            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp),
         )
     }
 }
@@ -178,27 +187,19 @@ private fun CategoryChips(
 ) {
     Text(
         text = stringResource(R.string.place_category),
-        style = MaterialTheme.typography.labelMedium,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
     )
-    Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-        Chip(
-            label = stringResource(R.string.category_hotel),
-            selected = form.category == PlaceCategory.HOTEL,
-            onClick = { onCategoryChange(PlaceCategory.HOTEL) },
-        )
-        Spacer(Modifier.width(8.dp))
-        Chip(
-            label = stringResource(R.string.category_restaurant),
-            selected = form.category == PlaceCategory.RESTAURANT,
-            onClick = { onCategoryChange(PlaceCategory.RESTAURANT) },
-        )
-        Spacer(Modifier.width(8.dp))
-        Chip(
-            label = stringResource(R.string.category_both),
-            selected = form.category == PlaceCategory.BOTH,
-            onClick = { onCategoryChange(PlaceCategory.BOTH) },
-        )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Chip(stringResource(R.string.category_hotel), form.category == PlaceCategory.HOTEL) {
+            onCategoryChange(PlaceCategory.HOTEL)
+        }
+        Chip(stringResource(R.string.category_restaurant), form.category == PlaceCategory.RESTAURANT) {
+            onCategoryChange(PlaceCategory.RESTAURANT)
+        }
+        Chip(stringResource(R.string.category_both), form.category == PlaceCategory.BOTH) {
+            onCategoryChange(PlaceCategory.BOTH)
+        }
     }
 }
 
@@ -209,31 +210,32 @@ private fun StatusChips(
 ) {
     Text(
         text = stringResource(R.string.place_status),
-        style = MaterialTheme.typography.labelMedium,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
     )
-    Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-        Chip(
-            label = stringResource(R.string.status_open),
-            selected = form.status == PlaceStatus.OPEN,
-            onClick = { onStatusChange(PlaceStatus.OPEN) },
-        )
-        Spacer(Modifier.width(8.dp))
-        Chip(
-            label = stringResource(R.string.status_closed),
-            selected = form.status == PlaceStatus.CLOSED,
-            onClick = { onStatusChange(PlaceStatus.CLOSED) },
-        )
-        Spacer(Modifier.width(8.dp))
-        Chip(
-            label = stringResource(R.string.status_unavailable),
-            selected = form.status == PlaceStatus.UNAVAILABLE,
-            onClick = { onStatusChange(PlaceStatus.UNAVAILABLE) },
-        )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Chip(stringResource(R.string.status_open), form.status == PlaceStatus.OPEN) {
+            onStatusChange(PlaceStatus.OPEN)
+        }
+        Chip(stringResource(R.string.status_closed), form.status == PlaceStatus.CLOSED) {
+            onStatusChange(PlaceStatus.CLOSED)
+        }
+        Chip(stringResource(R.string.status_unavailable), form.status == PlaceStatus.UNAVAILABLE) {
+            onStatusChange(PlaceStatus.UNAVAILABLE)
+        }
     }
 }
 
 @Composable
 private fun Chip(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(selected = selected, onClick = onClick, label = { Text(label) })
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        shape = MaterialTheme.shapes.small,
+    )
 }
